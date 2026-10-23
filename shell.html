@@ -1,0 +1,448 @@
+<title>天狗</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="后白河法皇模拟器：保元、平治、鹿谷、治承、寿永、坛之浦，亲历平源兴衰，多线多结局。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Yuji+Syuku&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+SC:wght@400;600;900&family=Noto+Serif+JP:wght@400;600&display=swap">
+<style>
+/* 布局：夜御殿——深紫墨地为殿中之夜，正文如展开的料纸；每帖以一种「襲色目」为帖色。单一夜色主题。 */
+:root{
+  --ink:#16121d;        /* 墨紫：殿中之夜 */
+  --ink2:#1e1927;       /* 帐台 */
+  --ink3:#2a2335;       /* 几帐边 */
+  --paper:#e8e1d3;      /* 胡粉：正文 */
+  --dim:#a59bb0;        /* 薄墨 */
+  --faint:#6f6680;
+  --gold:#cfa957;       /* 金箔 */
+  --shu:#d0533a;        /* 朱：印 */
+  --moegi:#97b660;      /* 萌黄：增 */
+  --sumire:#8a6cb8;     /* 菫 */
+  --k1:#cfa957; --k2:#6b4e8f; /* 当前帖之襲色目（由脚本替换） */
+  --f-disp:"Ma Shan Zheng","STKaiti","KaiTi",serif;
+  --f-body:"Noto Serif SC","Noto Serif JP","Songti SC","SimSun",serif;
+  --f-ja:"Noto Serif JP","Noto Serif SC",serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{
+  margin:0;
+  background:var(--ink);color:var(--paper);font-family:var(--f-body);font-size:16px;line-height:1.85;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%,rgba(207,169,87,.35) 50%,transparent 51%),
+    radial-gradient(1px 1px at 72% 42%,rgba(207,169,87,.25) 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 38% 78%,rgba(207,169,87,.2) 50%,transparent 51%),
+    radial-gradient(1px 1px at 88% 88%,rgba(207,169,87,.3) 50%,transparent 51%),
+    radial-gradient(ellipse 80% 60% at 50% -10%,rgba(107,78,143,.28),transparent 70%);
+  background-attachment:fixed;
+}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--ink)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.ja{font-family:var(--f-ja)}
+h1,h2,h3{text-wrap:balance;font-weight:600;margin:0}
+
+/* ---------- 顶栏 ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(22,18,29,.94);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--ink3);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:14px;min-height:54px}
+.logo{font-family:var(--f-disp);font-size:28px;color:var(--gold);line-height:1;background:none;border:0;padding:0;letter-spacing:.05em}
+.era{flex:1;min-width:0;font-size:13px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.era b{color:var(--paper);font-weight:600;margin-right:.6em}
+.nav{display:flex;gap:4px}
+.nav button{background:none;border:1px solid transparent;border-radius:3px;padding:4px 10px;font-size:14px;color:var(--dim)}
+.nav button:hover{color:var(--paper);border-color:var(--ink3)}
+.nav button[aria-current="true"]{color:var(--gold);border-color:rgba(207,169,87,.4)}
+@media (max-width:760px){
+  .nav{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--ink2);border-top:1px solid var(--ink3);justify-content:space-around;
+    padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+  .nav button{padding:6px 6px;font-size:13px}
+  main{padding-bottom:calc(70px + env(safe-area-inset-bottom,0px))!important}
+}
+
+main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 60px}
+.wrap{max-width:1180px;margin:0 auto}
+.view[hidden]{display:none!important}
+
+/* ---------- 标题 ---------- */
+.title{display:grid;grid-template-columns:auto 1fr;gap:clamp(20px,5vw,64px);align-items:start;padding-block:clamp(10px,4vh,40px)}
+.vert{writing-mode:vertical-rl;font-family:var(--f-ja);color:var(--dim);font-size:15px;line-height:2.1;letter-spacing:.12em;max-height:420px;border-right:1px solid var(--ink3);padding-right:14px}
+.vert .src{color:var(--faint);font-size:12px;margin-top:1em}
+.big{font-family:var(--f-disp);font-size:clamp(96px,22vw,200px);line-height:.9;color:var(--paper);margin:0;letter-spacing:-.02em;position:relative;display:inline-block}
+.big .seal{position:absolute;right:-.42em;top:.1em;font-family:var(--f-body);font-size:.13em;writing-mode:vertical-rl;background:var(--shu);color:#f6efe4;padding:.5em .3em;letter-spacing:.2em;font-weight:900;border-radius:2px;transform:rotate(3deg)}
+.sub{font-size:clamp(16px,2.4vw,20px);color:var(--gold);margin:18px 0 6px;letter-spacing:.3em}
+.lede{max-width:34em;color:var(--dim);margin:0 0 22px}
+.quote{border-left:2px solid var(--shu);padding:4px 0 4px 14px;margin:0 0 26px;max-width:36em}
+.quote p{margin:0;color:var(--paper)}
+.quote cite{display:block;font-style:normal;font-size:12px;color:var(--faint);margin-top:4px}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+.btn{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:10px 22px;border-radius:2px;letter-spacing:.2em;font-size:15px;transition:background .2s,color .2s}
+.btn:hover{background:var(--gold);color:var(--ink)}
+.btn.solid{background:var(--gold);color:var(--ink);font-weight:600}
+.btn.solid:hover{background:#e0bd6c}
+.btn.ghost{border-color:var(--ink3);color:var(--dim)}
+.btn.ghost:hover{background:var(--ink3);color:var(--paper)}
+.btn:disabled{opacity:.35;cursor:not-allowed;background:none;color:var(--dim)}
+.chlist{margin-top:34px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;max-width:760px}
+.chip{border-top:3px solid var(--a);background:linear-gradient(180deg,color-mix(in srgb,var(--b) 22%,transparent),transparent);padding:10px 10px 8px;font-size:13px}
+.chip b{display:block;font-family:var(--f-disp);font-size:22px;font-weight:400;line-height:1.2;color:var(--paper)}
+.chip span{color:var(--dim)}
+@media (max-width:600px){.title{grid-template-columns:minmax(0,1fr)}.title-mask{width:100%}.vert{writing-mode:horizontal-tb;border-right:0;border-bottom:1px solid var(--ink3);padding:0 0 12px;max-height:none;font-size:13px;line-height:1.9}}
+
+/* ---------- 游戏 ---------- */
+.game{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start}
+@media (max-width:960px){.game{grid-template-columns:1fr}}
+.scroll{background:var(--ink2);border:1px solid var(--ink3);position:relative;min-width:0}
+.kasane{height:6px;background:linear-gradient(90deg,var(--k1) 0 62%,var(--k2) 62% 100%)}
+.sc-in{padding:clamp(18px,4vw,40px) clamp(18px,5vw,52px) clamp(22px,4vw,40px)}
+.sc-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:13px;color:var(--dim);letter-spacing:.08em}
+.sc-head .ch{color:var(--k1)}
+.sc-title{font-family:var(--f-disp);font-weight:400;font-size:clamp(30px,5vw,44px);line-height:1.2;margin:10px 0 4px;color:var(--paper)}
+.sc-loc{font-size:13px;color:var(--faint);margin-bottom:22px}
+.sc-loc::before{content:attr(data-pre) "　";color:var(--k1)}
+.prose{max-width:38em}
+.prose p{margin:0 0 1.05em;text-indent:2em;opacity:0;animation:rise .6s forwards}
+.prose p.speech{text-indent:0;padding-left:1em;border-left:1px solid var(--ink3);color:#efe8db}
+.prose p.verse{text-indent:0;font-family:var(--f-ja);color:var(--gold);padding:.4em 0 .4em 2em;letter-spacing:.06em}
+.prose em{font-style:normal;color:var(--gold)}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.prose p{animation:none;opacity:1}}
+.note{margin:18px 0 6px;max-width:38em;font-size:13px;color:var(--dim);border-top:1px dashed var(--ink3);padding-top:10px}
+.note summary{cursor:pointer;color:var(--k1);letter-spacing:.15em;list-style:none}
+.note summary::-webkit-details-marker{display:none}
+.note summary::before{content:"▸ ";}
+.note[open] summary::before{content:"▾ ";}
+.note p{margin:.6em 0 0}
+.choices{display:grid;gap:10px;margin-top:22px;max-width:40em}
+.choice{text-align:left;background:transparent;border:1px solid var(--ink3);border-left:3px solid var(--k2);padding:12px 16px;border-radius:0 3px 3px 0;transition:border-color .2s,background .2s;display:grid;gap:3px}
+.choice:hover:not(:disabled){border-color:var(--k1);background:rgba(255,255,255,.025)}
+.choice .t{font-size:16px;color:var(--paper)}
+.choice .h{font-size:12.5px;color:var(--dim)}
+.choice .need{font-size:12px;color:var(--shu)}
+.choice:disabled{opacity:.42;cursor:not-allowed}
+.choice .k{font-family:var(--f-disp);color:var(--k1);margin-right:.5em;font-size:18px}
+
+/* 侧栏：起居之札 */
+.side{position:sticky;top:calc(70px + env(safe-area-inset-top,0px));display:grid;gap:16px;min-width:0}
+@media (max-width:960px){.side{position:static;order:-1}}
+.panel{background:var(--ink2);border:1px solid var(--ink3);padding:14px 16px}
+.panel h3{font-size:12px;letter-spacing:.3em;color:var(--gold);margin-bottom:10px;font-weight:600}
+.stats{display:grid;gap:9px}
+.stat{display:grid;grid-template-columns:3em 1fr 2.4em;gap:8px;align-items:center;font-size:13px}
+.stat .n{color:var(--paper)}
+.stat .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--dim)}
+.bar{height:6px;background:var(--ink3);position:relative;overflow:hidden}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--c,var(--gold));transition:width .6s}
+.fac{display:grid;grid-template-columns:3em 1fr 2.6em;gap:8px;align-items:center;font-size:13px;margin-top:8px}
+.fbar{height:6px;background:var(--ink3);position:relative}
+.fbar::before{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--faint)}
+.fbar i{position:absolute;top:0;bottom:0;transition:all .6s}
+.tengu{display:flex;align-items:center;gap:12px}
+
+.tengu small{display:block;color:var(--dim);font-size:12px;line-height:1.5}
+.mob-toggle{display:none}
+@media (max-width:960px){
+  .mob-toggle{display:flex;justify-content:space-between;align-items:center;width:100%;background:none;border:0;padding:0;color:var(--gold);font-size:12px;letter-spacing:.3em}
+  .side.closed .panel-body{display:none}
+  .side .panel h3.desk{display:none}
+  .side{grid-template-columns:1fr}
+}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:calc(100% - 32px);pointer-events:none}
+.toast span{background:var(--ink3);border:1px solid var(--faint);padding:3px 10px;font-size:13px;border-radius:2px;animation:pop 2.6s forwards}
+.toast .up{color:var(--moegi)} .toast .dn{color:var(--shu)}
+@keyframes pop{0%{opacity:0;transform:translateY(8px)}10%,80%{opacity:1;transform:none}100%{opacity:0}}
+
+/* 帖间幕 */
+.curtain{position:fixed;inset:0;z-index:50;background:var(--ink);display:grid;place-items:center;text-align:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+.curtain .kas{display:flex;justify-content:center;gap:0;margin:0 auto 22px;width:120px;height:10px}
+.curtain .kas i{flex:1}
+.curtain .no{color:var(--dim);letter-spacing:.5em;font-size:14px}
+.curtain h2{font-family:var(--f-disp);font-weight:400;font-size:clamp(54px,12vw,110px);line-height:1.1;margin:8px 0}
+.curtain .yrs{color:var(--gold);letter-spacing:.2em}
+.curtain .epi{max-width:30em;margin:22px auto 0;color:var(--dim);font-size:15px}
+.curtain .kn{font-size:12px;color:var(--faint);margin-top:6px}
+.curtain button{margin-top:30px}
+
+/* ---------- 人物志 ---------- */
+.pg-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px;margin-bottom:18px}
+.pg-h h2{font-family:var(--f-disp);font-weight:400;font-size:44px;line-height:1}
+.pg-h p{margin:0;color:var(--dim);font-size:14px;max-width:36em}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+.tabs button{background:none;border:1px solid var(--ink3);padding:4px 12px;font-size:13px;color:var(--dim);border-radius:2px}
+.tabs button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.pc{background:var(--ink2);border:1px solid var(--ink3);padding:14px 16px;display:grid;gap:6px;align-content:start;min-width:0}
+.pc .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.pc h4{margin:0;font-size:18px;font-weight:600}
+.pc .yr{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}
+.pc .role{font-size:12.5px;color:var(--gold)}
+.pc p{margin:0;font-size:13.5px;color:var(--dim);line-height:1.75}
+.st{font-size:11.5px;padding:1px 7px;border:1px solid currentColor;border-radius:2px;white-space:nowrap}
+.st.alive{color:var(--moegi)} .st.dead{color:var(--faint)} .st.yet{color:var(--sumire)} .st.alt{color:var(--shu)}
+
+/* 年表 */
+.chron{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+@media (max-width:800px){.chron{grid-template-columns:1fr}}
+.tl{border-left:1px solid var(--ink3);padding-left:18px;display:grid;gap:14px}
+.tl .ev{position:relative}
+.tl .ev::before{content:"";position:absolute;left:-23px;top:.55em;width:9px;height:9px;background:var(--ink);border:1px solid var(--gold);transform:rotate(45deg)}
+.tl .ev.passed::before{background:var(--gold)}
+.tl .y{font-size:12px;color:var(--gold);font-variant-numeric:tabular-nums;letter-spacing:.05em}
+.tl .ev p{margin:0;font-size:14px;color:var(--dim)}
+.tl .ev.passed p{color:var(--paper)}
+.tl .mine .y{color:var(--shu)}
+.tl .mine::before{border-color:var(--shu)!important;background:var(--shu)!important}
+.col-h{font-size:12px;letter-spacing:.3em;color:var(--gold);margin-bottom:12px}
+
+/* 结局录 */
+.ends{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.ec{border:1px solid var(--ink3);padding:16px;background:var(--ink2);min-height:130px;display:grid;align-content:start;gap:6px}
+.ec .no{font-size:12px;color:var(--faint);letter-spacing:.2em}
+.ec h4{margin:0;font-family:var(--f-disp);font-weight:400;font-size:26px;line-height:1.2}
+.ec p{margin:0;font-size:13px;color:var(--dim)}
+.ec.lock h4{color:var(--faint)}
+.ec .tag{font-size:11px;color:var(--shu);letter-spacing:.2em}
+
+/* 今样帖 */
+.songs{display:grid;gap:16px;max-width:820px}
+.song{background:var(--ink2);border:1px solid var(--ink3);padding:18px 22px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px}
+.song .v{writing-mode:vertical-rl;font-family:var(--f-ja);color:var(--gold);font-size:16px;line-height:2;letter-spacing:.1em;max-height:300px;min-height:160px}
+.song .tr p{margin:0 0 .6em;color:var(--paper)}
+.song .tr .c{font-size:13px;color:var(--dim)}
+.song.lock{opacity:.5}
+.song.lock .v{color:var(--faint)}
+@media (max-width:560px){.song{grid-template-columns:1fr}.song .v{writing-mode:horizontal-tb;min-height:0;max-height:none}}
+
+/* 结局页 */
+.ending{max-width:760px;margin:0 auto;text-align:left}
+.ending .seal2{display:inline-block;background:var(--shu);color:#f6efe4;font-weight:900;padding:6px 10px;font-size:13px;letter-spacing:.3em;margin-bottom:14px}
+.ending h2{font-family:var(--f-disp);font-weight:400;font-size:clamp(48px,10vw,88px);line-height:1.1}
+.ending .kind{color:var(--gold);letter-spacing:.2em;margin:8px 0 22px}
+.ending .hist{margin-top:24px;border-top:1px solid var(--ink3);padding-top:14px;font-size:14px;color:var(--dim)}
+.ending .hist b{color:var(--gold);font-weight:600;letter-spacing:.2em}
+.summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin:20px 0}
+.summary div{border:1px solid var(--ink3);padding:8px 10px;font-size:12px;color:var(--dim)}
+.summary b{display:block;font-size:20px;color:var(--paper);font-variant-numeric:tabular-nums}
+
+/* 卷末说明 */
+.about{max-width:760px}
+.about h3{color:var(--gold);font-size:15px;letter-spacing:.2em;margin:24px 0 8px}
+.about p,.about li{color:var(--dim);font-size:14.5px}
+.about b{color:var(--paper)}
+.stat-legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.stat-legend div{border:1px solid var(--ink3);padding:10px 12px;font-size:13px;color:var(--dim)}
+.stat-legend b{color:var(--gold);font-size:15px;display:block}
+.confirm{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--shu)}
+
+/* 绘像与对白 */
+.title-row{display:flex;align-items:center;gap:clamp(16px,4vw,48px);flex-wrap:wrap}
+.title-mask{width:clamp(240px,40vw,440px);max-width:100%;min-width:0}
+.title > *{min-width:0}
+.title-mask .plate{margin:0;border:1px solid var(--gold);padding:8px 8px 6px;background:linear-gradient(#2a2335,#1e1927);box-shadow:0 14px 30px rgba(0,0,0,.5)}
+.tengu .mask{width:84px;height:62px;flex:none;overflow:hidden;border:1px solid var(--shu);background:#000}
+.tengu .mask img{width:100%;height:100%;object-fit:cover;object-position:62% 30%;display:block;transition:filter .8s,opacity .8s}
+.cast{display:flex;flex-wrap:wrap;gap:10px;margin:-8px 0 22px}
+.cast .cm{display:grid;justify-items:center;gap:3px;width:56px}
+.cast .cm .f{width:46px;height:55px;border:1px solid color-mix(in srgb,var(--k1) 60%,transparent);overflow:hidden;background:var(--ink)}
+.cast .cm .f img,.say .pt img,.pc .ph img,.ending .hero .f img{width:100%;height:100%;object-fit:cover;display:block}
+.cast .cm span{font-size:11px;color:var(--dim);line-height:1.2;text-align:center}
+.say{display:grid;grid-template-columns:58px minmax(0,1fr);gap:12px;margin:0 0 1.05em;align-items:start;opacity:0;animation:rise .6s forwards;max-width:40em}
+.say.me{grid-template-columns:minmax(0,1fr) 58px}
+.say.me .pt{order:2}
+.say .pt{width:58px;height:70px;border:1px solid var(--gold);background:var(--ink);overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,.35)}
+
+.say .bub{position:relative;background:var(--ink3);border:1px solid #3a3147;padding:9px 14px 10px;border-radius:2px;min-width:0}
+.say .bub::before{content:"";position:absolute;top:18px;left:-7px;width:12px;height:12px;background:var(--ink3);border-left:1px solid #3a3147;border-bottom:1px solid #3a3147;transform:rotate(45deg)}
+.say.me .bub{background:#2e2540;border-color:#46395c}
+.say.me .bub::before{left:auto;right:-7px;background:#2e2540;border:0;border-right:1px solid #46395c;border-top:1px solid #46395c}
+.say .nm{font-size:12px;letter-spacing:.18em;color:var(--k1);margin-bottom:2px}
+.say.me .nm{text-align:right;color:var(--gold)}
+.say .bub div{color:#efe8db}
+@media (prefers-reduced-motion:reduce){.say{animation:none;opacity:1}}
+.pc{grid-template-columns:62px minmax(0,1fr);column-gap:14px}
+.pc .ph{grid-row:1 / span 4;width:62px;height:74px;border:1px solid var(--ink3);overflow:hidden;background:var(--ink)}
+
+.pc > :not(.ph){grid-column:2}
+.ending .hero{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 20px}
+.ending .hero .f{width:84px;height:101px;border:1px solid var(--gold);overflow:hidden;background:var(--ink)}
+
+
+.seal-ph{display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:radial-gradient(circle at 50% 45%,#2a1a1c,#160f14);color:var(--shu);font-weight:900;font-size:clamp(13px,40%,22px);line-height:1.05;text-align:center;letter-spacing:0;box-shadow:inset 0 0 0 3px #16121d,inset 0 0 0 5px rgba(208,83,58,.65);font-family:var(--f-body)}
+.pc .ph .seal-ph{font-size:20px}
+.say .pt .seal-ph{font-size:18px}
+.cast .cm .f .seal-ph{font-size:14px}
+.plate{margin:0 0 22px;max-width:40em}
+.plate img{width:100%;height:auto;display:block;border:1px solid var(--ink3);max-height:420px;object-fit:cover}
+.plate figcaption{font-size:12px;color:var(--faint);margin-top:6px;letter-spacing:.04em}
+#sc-plate .plate img{max-height:300px}
+.curtain{background:linear-gradient(rgba(22,18,29,.78),rgba(22,18,29,.92)),var(--bgimg) center/cover no-repeat,var(--ink)}
+.cur-cap{font-size:11px;color:var(--faint);margin-top:18px;max-width:32em;margin-inline:auto}
+.credits{display:grid;gap:6px;font-size:12.5px}
+.credits div{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:center;border-bottom:1px dashed var(--ink3);padding-bottom:6px}
+.credits .th{width:44px;height:52px;overflow:hidden;border:1px solid var(--ink3)}
+.credits .th img{width:100%;height:100%;object-fit:cover}
+.credits a{color:var(--dim);word-break:break-all}
+
+.lang{display:flex;gap:2px;flex:none}
+.lang button{background:none;border:1px solid var(--ink3);color:var(--dim);font-size:12px;padding:3px 8px;border-radius:2px;line-height:1.3}
+.lang button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
+:root[lang="ja"]{--f-disp:"Yuji Syuku","Noto Serif JP",serif;--f-body:"Noto Serif JP","Noto Serif SC",serif}
+:root[lang="en"]{--f-disp:"Cormorant Garamond","EB Garamond",Georgia,serif;--f-body:"EB Garamond","Noto Serif JP","Noto Serif SC",Georgia,serif}
+:root[lang="en"] body{font-size:17px;line-height:1.7}
+:root[lang="en"] .prose p{text-indent:1.4em;hyphens:auto}
+:root[lang="en"] .sc-title,:root[lang="en"] .curtain h2,:root[lang="en"] .ending h2,:root[lang="en"] .pg-h h2,:root[lang="en"] .chip b,:root[lang="en"] .ec h4{font-weight:600;letter-spacing:.01em}
+:root[lang="en"] .curtain h2{font-size:clamp(40px,9vw,80px)}
+:root[lang="en"] .sub{letter-spacing:.12em}
+:root[lang="en"] .btn{letter-spacing:.08em}
+@media (max-width:760px){.era{display:none}.top-in{justify-content:space-between}.top{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--ink)}}
+
+.mus-btn{display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--ink3);color:var(--dim);font-size:12px;padding:3px 9px;border-radius:2px;max-width:11em;flex:none;line-height:1.3}
+.mus-btn .ml{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mus-btn[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
+.mus-btn .mi{font-size:11px}
+.mus-panel{position:fixed;z-index:35;top:calc(60px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));width:min(340px,calc(100vw - 32px));background:var(--ink2);border:1px solid var(--gold);box-shadow:0 16px 40px rgba(0,0,0,.6);padding:14px 16px;display:grid;gap:12px}
+.mp-now{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.mp-now b{display:block;font-size:16px;color:var(--paper)}
+.mp-now small{display:block;font-size:12px;color:var(--faint)}
+.mp-ctl{display:flex;gap:6px;flex:none}
+.mp-ctl button{width:34px;height:34px;border:1px solid var(--ink3);background:none;color:var(--paper);border-radius:50%;font-size:12px}
+.mp-ctl button.big{width:42px;height:42px;border-color:var(--gold);color:var(--gold);font-size:14px}
+.mp-bar{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums}
+.mp-bar input,.mp-vol input{accent-color:var(--gold);width:100%;min-width:0}
+.mp-opt{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.mp-modes{display:flex;gap:4px}
+.mp-modes button{background:none;border:1px solid var(--ink3);color:var(--dim);font-size:12px;padding:2px 8px;border-radius:2px}
+.mp-modes button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
+.mp-vol{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim);width:9.5em;white-space:nowrap}
+.mp-list{list-style:none;margin:0;padding:0;display:grid;gap:2px;max-height:44vh;overflow:auto;border-top:1px solid var(--ink3);padding-top:8px}
+.mp-list button{width:100%;display:grid;grid-template-columns:1.6em 1fr auto;gap:8px;align-items:center;text-align:left;background:none;border:0;padding:6px 4px;color:var(--paper);border-radius:2px}
+.mp-list button:hover{background:rgba(255,255,255,.04)}
+.mp-list button[aria-current="true"]{color:var(--gold)}
+.mp-list .n{font-size:11px;color:var(--faint);font-variant-numeric:tabular-nums}
+.mp-list .tt{font-size:14px;min-width:0}
+.mp-list small{display:block;font-size:11px;color:var(--faint)}
+.mp-list .eq{color:var(--gold)}
+@media (max-width:760px){.mus-btn{margin-left:auto}.mus-btn .ml{display:none}.mus-panel{top:calc(56px + env(safe-area-inset-top,0px))}}
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <button class="logo" id="logo" aria-label="回到卷首">天狗</button>
+    <div class="era" id="era" data-t><b>卷首</b>后白河院御一代记</div>
+    <button class="mus-btn" id="mus-btn" aria-pressed="false" aria-label="Music">♪</button>
+    <div class="lang" id="lang" role="group" aria-label="Language"><button data-l="zh">中</button><button data-l="ja">日</button><button data-l="en">EN</button></div>
+    <nav class="nav" id="nav">
+      <button data-v="game" data-t>御所</button>
+      <button data-v="people" data-t>人物志</button>
+      <button data-v="chron" data-t>年表</button>
+      <button data-v="ends" data-t>结局录</button>
+      <button data-v="songs" data-t>今样帖</button>
+      <button data-v="about" data-t>卷末</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+<section class="view" id="v-title">
+  <div class="title">
+    <div class="vert">
+      <div class="ja">祇園精舎の鐘の声、諸行無常の響きあり。娑羅双樹の花の色、盛者必衰の理をあらはす。</div>
+      <div class="src" data-t>——《平家物语》卷一</div>
+    </div>
+    <div>
+      <div class="title-row"><h1 class="big">天狗<span class="seal">後白河院</span></h1><div class="title-mask" id="title-mask"></div></div>
+      <div class="sub" data-t>后白河院 · 御一代记</div>
+      <p class="lede" data-t>大治二年，鸟羽院第四皇子雅仁生于三条高仓。无人料他会登大位，更无人料他将在六十六年间，送走五代天子、两门武家、一整个摄关之世。保元、平治、鹿谷、治承、寿永、坛之浦——你将以他的身份，亲历平源兴衰，或改写之。</p>
+      <div class="quote">
+        <p class="ja">日本国第一の大天狗は、更に他の者にあらず候か。</p>
+        <cite data-t>——源赖朝致高阶泰经书，文治元年（《玉叶》《吾妻镜》）</cite>
+      </div>
+      <div class="btns">
+        <button class="btn solid" id="b-new" data-t>始　卷</button>
+        <button class="btn" id="b-cont" data-t>续　卷</button>
+        <button class="btn ghost" id="b-people" data-t>人物志</button>
+        <button class="btn ghost" id="b-about" data-t>卷末说明</button>
+      </div>
+      <div class="confirm" id="newconfirm" hidden>
+        <span data-t>已有存档。重新始卷将覆盖之。</span>
+        <button class="btn" id="b-new-yes" style="padding:4px 14px" data-t>覆盖始卷</button>
+        <button class="btn ghost" id="b-new-no" style="padding:4px 14px" data-t>罢</button>
+      </div>
+      <div class="chlist" id="chlist"></div>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="v-game" hidden>
+  <div class="game">
+    <article class="scroll" id="scroll">
+      <div class="kasane"></div>
+      <div class="sc-in">
+        <div class="sc-head"><span class="ch" id="sc-ch"></span><span id="sc-era"></span></div>
+        <h2 class="sc-title" id="sc-title"></h2>
+        <div class="sc-loc" id="sc-loc"></div>
+        <div class="cast" id="sc-cast"></div>
+        <div id="sc-plate"></div>
+        <div class="prose" id="sc-prose"></div>
+        <details class="note" id="sc-note"><summary data-t>史　注</summary><div id="sc-note-b"></div></details>
+        <div class="choices" id="sc-choices"></div>
+      </div>
+    </article>
+    <aside class="side closed" id="side">
+      <div class="panel">
+        <button class="mob-toggle" id="mob-toggle"><span data-t>起居之札</span><span id="mob-sum"></span></button>
+        <h3 class="desk" data-t>起居之札</h3>
+        <div class="panel-body">
+          <div class="stats" id="stats"></div>
+          <div id="facs" style="margin-top:14px"></div>
+          <div class="tengu" style="margin-top:14px"><span class="mask" id="t-mask"></span><div><b id="t-val">0</b><small id="t-txt"></small></div></div>
+        </div>
+      </div>
+      <div class="panel panel-body">
+        <h3 data-t>近事</h3>
+        <div id="recent" style="font-size:13px;color:var(--dim);display:grid;gap:6px"></div>
+        <div class="btns" style="margin-top:12px"><button class="btn ghost" id="b-restart" style="padding:4px 12px;font-size:13px;letter-spacing:.1em" data-t>重开</button></div>
+        <div class="confirm" id="rsconfirm" hidden style="margin-top:8px"><span data-t>确定弃此一世？</span><button class="btn" id="b-rs-yes" style="padding:3px 12px" data-t>弃之</button><button class="btn ghost" id="b-rs-no" style="padding:3px 12px" data-t>罢</button></div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<section class="view" id="v-ending" hidden><div class="ending" id="ending"></div></section>
+
+<section class="view" id="v-people" hidden>
+  <div class="pg-h"><h2 data-t>人物志</h2><p data-t>保元至建久，出场诸人。所标「在世」「已殁」随你所处之年与所走之路而变；若你改写了某人的命运，其状将以朱字标出。画像取自传世古画；无传世画像者以朱印代之。</p></div>
+  <div class="tabs" id="ptabs"></div>
+  <div class="people" id="plist"></div>
+</section>
+
+<section class="view" id="v-chron" hidden>
+  <div class="pg-h"><h2 data-t>年表</h2><p data-t>左为史实，右为此世之起居注——你在每一处岔路的抉择。</p></div>
+  <div class="chron">
+    <div><div class="col-h" data-t>史　实</div><div class="tl" id="tl-hist"></div></div>
+    <div><div class="col-h" data-t>此世起居注</div><div class="tl" id="tl-mine"></div></div>
+  </div>
+</section>
+
+<section class="view" id="v-ends" hidden>
+  <div class="pg-h"><h2 data-t>结局录</h2><p id="end-count"></p></div>
+  <div class="ends" id="elist"></div>
+</section>
+
+<section class="view" id="v-songs" hidden>
+  <div class="pg-h"><h2 data-t>今样帖</h2><p data-t>后白河院自少年时耽于今样，「昼は終日歌ひ暮らし、夜は終夜歌ひ明かさぬ夜はなかりき」。所录诸歌出自院亲撰之《梁尘秘抄》，于游戏中相应时刻解锁。</p></div>
+  <div class="songs" id="slist"></div>
+</section>
+
+<section class="view" id="v-about" hidden>
+  <div class="about" id="about"></div>
+</section>
+
+</div>
+</main>
+<div class="mus-panel" id="mus-panel" hidden></div>
+<div class="toast" id="toast" aria-live="polite"></div>
+<div class="curtain" id="curtain" hidden></div>
